@@ -11,7 +11,7 @@
  const text=visibleText(card);if(/\d\s*x\s*(?:de\s*)?R\$|parcelas?\s*(?:de\s*)?R\$/i.test(text))return null;const values=pricesIn(text);return values.length===1?values[0]:null;
  }
  let lastScan=0;
- function collect(){if(!document.body)return;lastScan=Date.now();const offers=[],seen=new Set();const diagnostics={links:0,ambiguousPrice:0,missingTitle:0,blocked:blocked()};if(!diagnostics.blocked)for(const a of document.querySelectorAll('a[href]')){
+ async function collect(){if(!document.body)return;lastScan=Date.now();let state;try{state=await chrome.runtime.sendMessage({type:'collectorState'});}catch{return;}if(!state?.allowed)return;const offers=[],seen=new Set();const diagnostics={links:0,ambiguousPrice:0,missingTitle:0,blocked:blocked()};if(!diagnostics.blocked)for(const a of [...document.querySelectorAll('a[href]')].slice(0,600)){
  let u;try{u=new URL(a.href);}catch{continue;}if(!validHost(u)||!paths[source].test(u.pathname))continue;u.search='';u.hash='';if(seen.has(u.href))continue;diagnostics.links++;
  let card=a;for(let depth=0;depth<6;depth++){if(pricesIn(visibleText(card)).length)break;if(!card.parentElement)break;const parent=card.parentElement;const itemLinks=[...parent.querySelectorAll('a[href]')].filter(el=>{try{const x=new URL(el.href,location.href);return validHost(x)&&paths[source].test(x.pathname);}catch{return false;}});if(new Set(itemLinks.map(el=>el.href.split('?')[0])).size>1)break;card=parent;}
  const text=(card.innerText||visibleText(card)).trim(),price=priceOf(card);if(price===null){diagnostics.ambiguousPrice++;continue;}
@@ -20,7 +20,6 @@
  }
  if(!diagnostics.blocked&&paths[source].test(location.pathname)){const u=new URL(location.href);u.search='';u.hash='';const heading=document.querySelector('h1');if(heading){let root=heading;for(let i=0;i<6&&root.parentElement&&!pricesIn(visibleText(root)).length;i++){if(root.parentElement===document.body)break;root=root.parentElement;}const price=priceOf(root);const title=(heading.innerText||'').trim();if(price!==null&&title){const city=source==='Facebook'?Array.from(document.querySelectorAll('span,p')).map(n=>(n.innerText||'').trim()).find(t=>t.length<100&&/Nova Mutum|Lucas do Rio Verde|Sorriso|Sinop|Cuiab[aá]|Diamantino|Nobres|Vera,|V[aá]rzea Grande/.test(t)):'';const large=[...document.images].filter(img=>img.naturalWidth>300&&img.naturalHeight>200).sort((a,b)=>b.naturalWidth*b.naturalHeight-a.naturalWidth*a.naturalHeight)[0];offers.unshift({source,url:u.href,title:title.slice(0,300),text:(title+' '+(city||'')).slice(0,1500),price,image:large?.currentSrc||large?.src||''});diagnostics.detail=true;}else diagnostics.ambiguousPrice++;}}
  const query=new URL(location.href);const productTag=query.searchParams.get('q')||query.searchParams.get('keyword')||query.searchParams.get('query')||(source==='AliExpress'?decodeURIComponent(query.pathname.match(/wholesale-(.*)\.html/)?.[1]||'').replaceAll('-',' '):'');chrome.runtime.sendMessage({type:'collect',offers:offers.map(o=>({...o,productTag:productTag.slice(0,100)})),diagnostics}).catch(()=>{});}
- setTimeout(collect,5000);setInterval(collect,120000);
- // Search pages render after navigation; rescan after loaded results appear.
- let pending;new MutationObserver(()=>{if(Date.now()-lastScan<20000||pending)return;pending=setTimeout(()=>{pending=null;collect();},3000);}).observe(document.documentElement,{childList:true,subtree:true});
+ setTimeout(collect,5000);setTimeout(collect,20000);setTimeout(collect,60000);setInterval(collect,180000);
+ // Fixed, bounded scans avoid keeping a mutation observer on busy marketplace pages.
 })();

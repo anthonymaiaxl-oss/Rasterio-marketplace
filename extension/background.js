@@ -10,9 +10,13 @@ async function schedule(s){
 async function ensureSchedule(){const s=await settings();if(!s.running)return;if(!await chrome.alarms.get('rotate')){const when=Math.max(Date.now()+1000,s.nextRotation||Date.now()+s.minutes*60000);await chrome.alarms.create('rotate',{when,periodInMinutes:s.minutes});await chrome.storage.local.set({settings:{...s,nextRotation:when}});}}
 async function rotate(){const s=await settings();if(!s.running||!s.terms.length)return;const sources=['OLX','AliExpress','Shopee',...(s.facebookConfirmed?['Facebook']:[])];const term=s.terms[s.index%s.terms.length];const platformIndex=(s.platformIndex||0)%sources.length;const passIndex=(s.passIndex||0)%(s.passes||2);const results=[];
  for(const source of [sources[platformIndex]]){
-  try{const url=searchURL(source,term);let tab;try{if(s.tabs[source])tab=await chrome.tabs.get(s.tabs[source]);}catch{}
-   // Only reuse tabs still on the expected marketplace; never navigate unrelated user tabs.
-   if(tab&&sourceFor(tab.url)===source)await chrome.tabs.update(tab.id,{url,active:false});else {tab=await chrome.tabs.create({url,active:false});s.tabs[source]=tab.id;}
+  try{const url=searchURL(source,term);let tab;const oldTabs={...s.tabs};
+   if(s.managedTabId){try{const current=await chrome.tabs.get(s.managedTabId);if(sourceFor(current.url)===sourceFor(s.managedTabURL))tab=current;}catch{}}
+   else for(const [previousSource,id] of Object.entries(oldTabs)){try{const current=await chrome.tabs.get(id);if(sourceFor(current.url)===previousSource){tab=current;break;}}catch{}}
+   if(tab)await chrome.tabs.update(tab.id,{url,active:false});else tab=await chrome.tabs.create({url,active:false});
+   s.managedTabId=tab.id;s.managedTabURL=url;s.tabs={[source]:tab.id};
+   // Retire only background tabs previously created for the automatic search loop.
+   for(const [previousSource,id] of Object.entries(oldTabs)){if(id===tab.id)continue;try{const extra=await chrome.tabs.get(id);if(!extra.active&&sourceFor(extra.url)===previousSource)await chrome.tabs.remove(id);}catch{}}
    results.push({source,ok:true});
   }catch(e){results.push({source,ok:false,error:String(e.message).slice(0,200)});}
  }
@@ -28,6 +32,7 @@ chrome.runtime.onStartup.addListener(()=>serial(async()=>schedule(await settings
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='rotate')serial(rotate).catch(async e=>chrome.storage.local.set({rotationError:String(e.message)}));});
 chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  const internal=['dashboard.html','insights.html'].some(path=>sender.url?.split('?')[0]===chrome.runtime.getURL(path));
+ if(m.type==='collectorState'&&sender.tab&&sourceFor(sender.url)){serial(async()=>{const s=await settings();const source=sourceFor(sender.url);const captures=(await chrome.storage.local.get('captureTabs')).captureTabs||{};const request=captures[sender.tab.id];return {allowed:Boolean(s.running&&s.tabs[source]===sender.tab.id||request&&request.until>Date.now()&&sourceFor(request.url)===source)};}).then(respond,e=>respond({allowed:false}));return true;}
  if(m.type==='collect'&&sender.tab&&sourceFor(sender.url)){
  serial(async()=>{const s=await settings();const source=sourceFor(sender.url);const capture=(await chrome.storage.local.get('captureTabs')).captureTabs||{};const request=capture[sender.tab.id];const manual=request&&request.until>Date.now()&&sourceFor(request.url)===source; if(!manual&&(!s.running||s.tabs[source]!==sender.tab.id))return {ok:true,ignored:true};const data=await chrome.storage.local.get('offers');const incoming=(Array.isArray(m.offers)?m.offers:[]).filter(o=>sourceFor(o.url)===source&&(!manual||o.url===request.url)).map(o=>({...o,source,regionVerified:source==='Facebook'&&s.facebookConfirmed}));const previous=(await chrome.storage.local.get('collectionStatus')).collectionStatus||{};const diag=m.diagnostics||{};const state={source,count:incoming.length,at:Date.now(),links:Number(diag.links)||0,ambiguousPrice:Number(diag.ambiguousPrice)||0,blocked:Boolean(diag.blocked)};await chrome.storage.local.set({offers:mergeOffers(data.offers||[],incoming),lastCollection:state,collectionStatus:{...previous,[source]:state}});return {ok:true};}).then(respond,e=>respond({error:e.message}));return true;
  }
