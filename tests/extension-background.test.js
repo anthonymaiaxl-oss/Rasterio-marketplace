@@ -8,7 +8,7 @@ const internal={url:'chrome-extension://test/dashboard.html'};
 const message=(m,s=internal)=>new Promise(resolve=>{const accepted=listener(m,s,resolve);if(!accepted)resolve(null);});
 test('serviço real: rodízio, pausa, filtro de abas e persistência de revisão',async()=>{
  assert.equal((await message({type:'settings',terms:'PS5\niPhone',minutes:15,running:true,facebookConfirmed:false})).ok,true);
- assert.equal(tabs.size,3);assert.equal(alarm.periodInMinutes,15);assert.equal(store.settings.index,1);
+ assert.equal(tabs.size,1);assert.equal(alarm.periodInMinutes,15);assert.equal(store.settings.index,0);
  const olx=store.settings.tabs.OLX;const payload={type:'collect',offers:[{url:'https://www.olx.com.br/anuncio/12345678',source:'OLX',title:'PS5',text:'funcionando',price:1000}]};
  await message(payload,{url:'https://www.olx.com.br/brasil?q=PS5',tab:{id:999}});assert.equal(store.offers,undefined);
  await message(payload,{url:'https://www.olx.com.br/brasil?q=PS5',tab:{id:olx}});assert.equal(store.offers.length,1);
@@ -21,8 +21,9 @@ test('serviço real: rodízio, pausa, filtro de abas e persistência de revisão
 test('restaura alarme ausente e roda manualmente sem interromper outras fontes',async()=>{
  await message({type:'settings',terms:'PS5\niPhone',minutes:15,running:true});alarm=null;
  const diag=await message({type:'diagnostics'});assert.ok(diag.alarm);assert.equal(diag.alarm.periodInMinutes,15);
- const previous=store.settings.lastTerm;const update=chrome.tabs.update;chrome.tabs.update=async(id,opts)=>{if(id===store.settings.tabs.OLX)throw Error('Aba temporariamente indisponível');return update(id,opts);};
- assert.equal((await message({type:'rotateNow'})).ok,true);assert.notEqual(store.settings.lastTerm,previous);assert.equal(store.settings.rotationResults.filter(r=>r.ok).length,2);assert.match(store.settings.rotationResults[0].error,/indisponível/);chrome.tabs.update=update;
+ const create=chrome.tabs.create,update=chrome.tabs.update;chrome.tabs.create=async()=>{throw Error('Aba temporariamente indisponível');};chrome.tabs.update=async()=>{throw Error('Aba temporariamente indisponível');};
+ assert.equal((await message({type:'rotateNow'})).ok,true);assert.equal(store.settings.rotationResults.length,1);assert.equal(store.settings.rotationResults[0].ok,false);assert.match(store.settings.rotationResults[0].error,/indisponível/);chrome.tabs.create=create;chrome.tabs.update=update;
+ assert.equal((await message({type:'rotateNow'})).ok,true);assert.equal(store.settings.rotationResults[0].ok,true);
 });
 
 test('coleta por link autoriza apenas o anúncio solicitado mesmo com rodízio pausado',async()=>{
@@ -34,3 +35,7 @@ test('coleta por link autoriza apenas o anúncio solicitado mesmo com rodízio p
  assert.ok(store.offers.some(o=>o.url===sample.url));assert.ok(!store.offers.some(o=>o.url.endsWith('/999999/')));
  const denied=await message({type:'captureLink',url:'https://www.facebook.com/messages/'});assert.match(denied.error,/anúncio/);
 });
+
+test('alarme alterna entre produtos configurados, em vez de repetir apenas PS5',async()=>{await message({type:'settings',terms:'PS5\niPhone 13\nparafusadeira',minutes:15,running:true});const terms=new Set([store.settings.lastTerm]);for(let i=0;i<8;i++){alarmListener({name:'rotate'});await message({type:'diagnostics'});terms.add(store.settings.lastTerm);}assert.equal(terms.size,3);assert.ok(terms.has('parafusadeira'));});
+
+test('ciclo visita todos os termos em todas as fontes duas vezes, uma plataforma por rodada',async()=>{store.settings={...store.settings,running:false,index:0,platformIndex:0,passIndex:0};await message({type:'settings',terms:'PS5\niPhone',minutes:10,passes:2,running:true,facebookConfirmed:true});for(let i=0;i<15;i++){assert.equal(store.settings.rotationResults.length,1);alarmListener({name:'rotate'});await message({type:'diagnostics'});}assert.equal(store.settings.dailyProgress.visited.length,16);assert.equal(store.settings.index,0);assert.equal(store.settings.platformIndex,0);assert.equal(store.settings.passIndex,0);});
