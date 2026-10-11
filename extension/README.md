@@ -40,3 +40,9 @@ Históricos antigos não têm fotos. Use **+ Foto / print** em cada cartão (PNG
 Referências do Facebook com cidades reconhecidas a mais de 200 km ou cidade desconhecida não entram na mediana. Distâncias usam centros urbanos em linha reta, não rodovias nem endereço do vendedor. A lista inicial reconhece Nova Mutum, Lucas do Rio Verde, Sorriso, Sinop, Cuiabá, Diamantino, Nobres, Vera e Várzea Grande; outras cidades precisam de confirmação fora desta primeira versão. O filtro regional da plataforma continua sendo configuração manual.
 
 Validação do dashboard com Chrome APIs simuladas: `node scripts/test-gallery.mjs`. Opcionalmente defina `HISTORY_PATH` apontando para uma exportação local para verificar seus registros; o teste não publica esses dados.
+
+## Coleta atualizada — versão 0.2.1
+
+O coletor aceita links de produto entre subdomínios do AliExpress e lê valores divididos em elementos do cartão. Em AliExpress e Shopee, tenta primeiro o elemento de preço atual; valores antigos riscados são ignorados. Preços ambíguos e parcelas sem preço total continuam sendo rejeitados. Páginas com verificação/CAPTCHA são sinalizadas, sem contorno. O dashboard mostra, por fonte, o número de itens da última leitura, ausência de links de produto ou preços não identificados com segurança.
+
+Depois de substituir os arquivos e recarregar a extensão, abra o painel **Acompanhamento e revisão** e clique em **Rodar agora** para recarregar as abas com o novo coletor. Aguarde o carregamento e confira o status no dashboard visual. Fechar/reabrir ou atualizar as abas existentes também é necessário para que recebam o novo script.
