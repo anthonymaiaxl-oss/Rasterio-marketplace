@@ -28,3 +28,15 @@ Validação automatizada cobre análise, persistência e rodízio com APIs do Ch
 ## Atualizar para 0.1.1
 
 Baixe novamente a mesma branch e substitua os arquivos na pasta `extension` que já foi carregada no Chrome. Em `chrome://extensions`, clique no botão de recarregar do Rasterio; não remova a extensão, para preservar os dados locais. Feche o painel antigo e abra novamente pelo ícone. Ative/salve o acompanhamento e clique em **Rodar agora**. O painel exibe a última rodada, a próxima prevista e erros por fonte. Alarmes ausentes são recriados quando o serviço/painel reinicia; falhas em uma aba não interrompem as demais fontes. Chrome pode atrasar alarmes enquanto o computador dorme.
+
+## Dashboard visual — versão 0.2.0
+
+Após atualizar os arquivos da mesma pasta e recarregar a extensão em `chrome://extensions`, o ícone Rasterio abre o novo dashboard. A tela anterior continua em **Acompanhamento e revisão**.
+
+Clique em **Importar histórico** e escolha seu `rasterio-historico.json`. Importações são validadas antes de salvar, preservam datas e reúnem URLs repetidas. O arquivo do usuário não acompanha o repositório. Os cartões têm filtros por fonte/categoria, preços, gráfico das mudanças observadas e links para os anúncios. Média/mediana e economia continuam exigindo revisão de equivalência e custos na tela de acompanhamento; agrupar por categoria não prova equivalência.
+
+Históricos antigos não têm fotos. Use **+ Foto / print** em cada cartão (PNG/JPEG/WebP até 1 MB). As próximas coletas incluem a imagem carregada no cartão quando disponível. URLs de imagens são restritas a HTTPS de CDNs conhecidas; se faltarem ou expirarem, aparece uma ilustração identificada como sem foto. Imagens externas são carregadas do CDN quando você abre o dashboard. Fotos locais ficam no armazenamento do Chrome e acompanham a exportação.
+
+Referências do Facebook com cidades reconhecidas a mais de 200 km ou cidade desconhecida não entram na mediana. Distâncias usam centros urbanos em linha reta, não rodovias nem endereço do vendedor. A lista inicial reconhece Nova Mutum, Lucas do Rio Verde, Sorriso, Sinop, Cuiabá, Diamantino, Nobres, Vera e Várzea Grande; outras cidades precisam de confirmação fora desta primeira versão. O filtro regional da plataforma continua sendo configuração manual.
+
+Validação do dashboard com Chrome APIs simuladas: `node scripts/test-gallery.mjs`. Opcionalmente defina `HISTORY_PATH` apontando para uma exportação local para verificar seus registros; o teste não publica esses dados.

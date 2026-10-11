@@ -22,7 +22,7 @@ async function rotate(){const s=await settings();if(!s.running||!s.terms.length)
 }
 // Service workers restart often; alarms may disappear after browser restart.
 serial(ensureSchedule);
-chrome.action.onClicked.addListener(()=>chrome.tabs.create({url:chrome.runtime.getURL('dashboard.html')}));
+chrome.action.onClicked.addListener(()=>chrome.tabs.create({url:chrome.runtime.getURL('insights.html')}));
 chrome.runtime.onInstalled.addListener(()=>serial(async()=>{const s=await settings();await chrome.storage.local.set({settings:s});await schedule(s);}));
 chrome.runtime.onStartup.addListener(()=>serial(async()=>schedule(await settings())));
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='rotate')serial(rotate).catch(async e=>chrome.storage.local.set({rotationError:String(e.message)}));});

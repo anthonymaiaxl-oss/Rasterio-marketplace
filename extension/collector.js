@@ -9,7 +9,7 @@
  // Multiple prices may be installments, variants or promotions: require one unambiguous price.
  if(prices.length!==1)continue;const price=Number(prices[0].replace(/R\$\s*/,'').replaceAll('.','').replace(',','.'));if(!price||price>1000000)continue;
  const heading=card.querySelector('h2,h3,[data-testid="adcard-title"],[data-testid="ad-card-title"]');const title=(heading?.innerText||a.querySelector('img')?.alt||text.split('\n').filter(t=>!t.includes('R$')).join(' ')).trim();if(!title)continue;
- offers.push({source,url:u.href,title:title.slice(0,300),text:text.slice(0,1500),price});seen.add(u.href);if(offers.length>=100)break;
+ const img=card.querySelector('img');const image=img?.currentSrc||img?.src||'';offers.push({source,url:u.href,title:title.slice(0,300),text:text.slice(0,1500),price,image});seen.add(u.href);if(offers.length>=100)break;
  }chrome.runtime.sendMessage({type:'collect',offers}).catch(()=>{});}
  setTimeout(collect,5000);setInterval(collect,120000);
 })();
