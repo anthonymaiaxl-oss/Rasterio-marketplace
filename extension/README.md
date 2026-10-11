@@ -50,3 +50,9 @@ Depois de substituir os arquivos e recarregar a extensão, abra o painel **Acomp
 ## Coleta por link — versão 0.2.2
 
 Cole o link de um anúncio no campo do dashboard visual e clique em **Coletar este anúncio**. A extensão abre uma aba para capturar somente esse link durante 20 minutos, mesmo com o rodízio pausado. Links de busca e destinos fora dos marketplaces configurados são rejeitados. Faça login/verificação no próprio site quando solicitado. O coletor tenta identificar título, preço atual, cidade e imagem carregada; não coleta mensagens nem credenciais. Elementos com preço riscado por CSS também são ignorados. Páginas cujo título/preço não puderem ser identificados precisam de validação manual. Facebook continua sendo apenas referência de preço.
+
+## Raio local configurável — versão 0.2.3
+
+Em **Acompanhamento e revisão**, escolha **Raio local do Facebook (km)**; o padrão agora é 80 km. Configure o mesmo raio na própria página do Marketplace, marque a confirmação e salve. O dashboard recalcula as referências já coletadas pelo raio escolhido; anúncios fora dele continuam guardados, mas ficam fora da referência local. O raio usa distância em linha reta a partir de centros urbanos conhecidos, não distância rodoviária.
+
+Para mudar o raio durante o acompanhamento: pause, ajuste a localização/raio no Facebook, ajuste o campo da extensão, confirme, salve e retome. Para duas instâncias independentes, use dois perfis do Chrome com a extensão carregada em cada um. Configurações e histórico são separados por perfil; confira o raio no próprio Facebook, que pode conservar preferências da conta. Instalar a mesma extensão duas vezes no mesmo perfil não cria instâncias independentes.
