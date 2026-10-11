@@ -3,3 +3,5 @@
 #collection-status{font-size:11px;color:#637e67;line-height:1.8;background:#e8efdf;padding:12px;border-radius:8px}
 
 .opportunity-view .overview,.opportunity-view #mode{display:none}#opportunity-note{font-size:12px;line-height:1.8;background:#e3edd9;padding:18px;border-radius:10px}#stage-label{font-size:12px}#opportunity-stage{margin:0 0 15px 12px;padding:10px;border:1px solid #c8d7c0;border-radius:8px;color:#254a35;background:white}.opportunity-view .saving{line-height:1.8}
+
+.price-filters{align-items:end}.price-filters label{display:grid;gap:6px;font-size:12px}.price-filters input{width:170px;flex:none}.price-filters .secondary{margin:0}#price-error{font-size:12px;color:#934b27;align-self:center}
