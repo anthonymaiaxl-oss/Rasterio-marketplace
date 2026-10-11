@@ -18,7 +18,7 @@ $('rotate-now').onclick=async()=>{const b=$('rotate-now');b.disabled=true;try{aw
 $('filter').oninput=render;$('only').onchange=render;
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify({format:'rasterio-extension-v1',exportedAt:new Date().toISOString(),offers:all},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=el('a');a.href=url;a.download='rasterio-historico.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('clear').onclick=async()=>{if(confirm('Apagar anúncios e histórico? Exporte antes se quiser guardar.')){await send({type:'clear'});await load();}};
-chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&(changes.offers||changes.lastCollection))load();});send({type:'diagnostics'}).then(load).catch(e=>{$('schedule-status').textContent=e.message;});
+chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&(changes.offers||changes.lastCollection||changes.settings))load();});send({type:'diagnostics'}).then(load).catch(e=>{$('schedule-status').textContent=e.message;});
 
 setInterval(async()=>{try{const result=await send({type:'diagnostics'});const d=await chrome.storage.local.get('settings');const s=d.settings||{};const errors=(s.rotationResults||[]).filter(r=>!r.ok).map(r=>r.source+': '+r.error);$('schedule-status').textContent=`${s.lastRotation?'Última rodada: '+new Date(s.lastRotation).toLocaleString('pt-BR')+'. ':''}${result.alarm?'Próxima rodada prevista: '+new Date(result.alarm.scheduledTime).toLocaleString('pt-BR'):s.running?'Agendamento ausente':'Rodízio pausado'}${errors.length?' · Erros: '+errors.join('; '):''}`;}catch(e){$('schedule-status').textContent=e.message;}},30000);
 

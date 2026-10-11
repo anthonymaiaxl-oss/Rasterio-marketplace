@@ -1,6 +1,6 @@
 (()=>{
  const host=location.hostname;const source=host.endsWith('olx.com.br')?'OLX':host.endsWith('aliexpress.com')?'AliExpress':host.endsWith('shopee.com.br')?'Shopee':'Facebook';
- const paths={OLX:/\/\d{6,}(?:[/?#]|$)|\/anuncio\//,AliExpress:/\/item\/\d+\.html/,Shopee:/-i\.\d+\.\d+|\/product\/\d+\/\d+/,Facebook:/\/marketplace\/item\/\d+/};
+ const paths={OLX:/(?:\/|-)\d{6,}(?:[/?#]|$)|\/anuncio\//,AliExpress:/\/item\/\d+\.html/,Shopee:/-i\.\d+\.\d+|\/product\/\d+\/\d+/,Facebook:/\/marketplace\/item\/\d+/};
  const validHost=u=>u.protocol==='https:'&&!u.username&&!u.password&&(source==='AliExpress'?(u.hostname==='aliexpress.com'||u.hostname.endsWith('.aliexpress.com')):source==='Shopee'?['shopee.com.br','www.shopee.com.br'].includes(u.hostname):source==='OLX'?(u.hostname==='olx.com.br'||u.hostname.endsWith('.olx.com.br')):u.hostname==='www.facebook.com');
  const norm=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  const blocked=()=>/captcha|verifique que voce|verify you are human|confirme que voce|verificacao de seguranca/.test(norm(document.body?.innerText||''));
@@ -8,7 +8,7 @@
  function pricesIn(text){const values=[];for(const m of text.matchAll(/R\$\s*(\d[\d.]*\s*(?:,\s*\d{2})?)(?![\d,])/g)){const amount=m[1].replace(/\s/g,'');let value;if(amount.includes(','))value=Number(amount.replaceAll('.','').replace(',','.'));else if(/^\d+\.\d{2}$/.test(amount))value=Number(amount);else value=Number(amount.replaceAll('.',''));if(Number.isFinite(value)&&value>0&&value<=1000000)values.push(value);}return values;}
  function priceOf(card){const selectors=source==='AliExpress'?'[class*="price--current"],[class*="price-current"],[data-testid="product-price"]':source==='Shopee'?'[data-sqe="price"],[data-testid="product-price"]':'';
  if(selectors){const primary=[...card.querySelectorAll(selectors)].filter(n=>!n.closest('del,s,strike'));const values=primary.flatMap(n=>/\d\s*x|parcela/i.test(visibleText(n))?[]:pricesIn(visibleText(n)));if(values.length===1)return values[0];if(values.length>1)return null;}
- const text=visibleText(card);if(/\d\s*x\s*(?:de\s*)?R\$|parcelas?\s*(?:de\s*)?R\$/i.test(text))return null;const values=pricesIn(text);return values.length===1?values[0]:null;
+ let text=visibleText(card);if(source==='OLX')text=text.replace(/(?:em\s+)?(?:at[eé]\s+)?\d+\s*x\s*(?:de\s*)?R\$\s*\d[\d.]*\s*(?:,\s*\d{2})?(?:\s*sem juros)?/gi,'');if(/\d\s*x\s*(?:de\s*)?R\$|parcelas?\s*(?:de\s*)?R\$/i.test(text))return null;const values=pricesIn(text);return values.length===1?values[0]:null;
  }
  let lastScan=0,lastOffers=0,paginationAllowed=false,lastURLs=[],scrolledURLs=new Set();
  async function collect(){if(!document.body)return;lastScan=Date.now();let state;try{state=await chrome.runtime.sendMessage({type:'collectorState'});}catch{return;}if(!state?.allowed)return;paginationAllowed=state.pagination===true;const offers=[],seen=new Set();const diagnostics={links:0,ambiguousPrice:0,missingTitle:0,blocked:blocked()};if(!diagnostics.blocked)for(const a of [...document.querySelectorAll('a[href]')].slice(0,600)){
