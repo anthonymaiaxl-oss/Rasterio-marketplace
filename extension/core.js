@@ -23,3 +23,8 @@ export function insights(offers,now=Date.now(),radius=200){
  return {...o,typical,mean,samples:values.length,regionalSamples:regional.length,regionalMean:regional.length>=3?regional.reduce((sum,r)=>sum+r.price,0)/regional.length:null,regionalMedian:regional.length>=3?median(regional.map(r=>r.price)):null,referenceBasis:regional.length>=3?'regional':'entre fontes',total,saving:eligible?typical-total:null,drop:o.history?.length>1?o.history[0].price-o.price:0};
  }).sort((a,b)=>(b.saving??-Infinity)-(a.saving??-Infinity)||b.lastSeen-a.lastSeen);
 }
+export function bestOpportunities(offers,now=Date.now(),radius=80){
+ const rows=insights(offers,now,radius);const ready=rows.filter(o=>o.saving>0&&o.total<o.mean).map(o=>({...o,discountPercent:(o.mean-o.total)/o.mean*100})).sort((a,b)=>b.saving-a.saving||b.discountPercent-a.discountPercent);
+ const pending=rows.filter(o=>o.saving===null&&o.mean!==null&&o.price<o.mean&&o.price<o.typical&&o.risk!=='alto/incerto'&&now-o.lastSeen<86400000).map(o=>({...o,missing:[...(!o.reviewed?['revisão de modelo/condição']:[]),...(!o.working&&!o.simpleRepair?['funcionamento ou diagnóstico do reparo']:[]),...(!o.delivery?['entrega para seu CEP']:[]),...(o.total===null?['frete, impostos, peça e reserva']:[])]})).sort((a,b)=>(b.mean-b.price)-(a.mean-a.price));
+ return {ready,pending,withoutReference:rows.filter(o=>o.mean===null).length};
+}
