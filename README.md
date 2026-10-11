@@ -44,3 +44,11 @@ Informe valores finais do checkout para seu CEP. Cupons podem ser restritos a no
 ## Integração futura
 
 O rastreamento automático permanece pendente de uma fonte de dados autorizada/acessível, documentação da integração e validação de cobertura regional. Esta versão não pede senha do Facebook, não automatiza login e não contorna restrições das plataformas. Não há credenciais ou serviços externos obrigatórios para o fluxo de cadastro/importação.
+
+## Revenda local e palavras-chave
+
+Destino informado: CEP **78450-080**, Nova Mutum (MT). Configure esse CEP no checkout das plataformas; os links de busca não configuram frete ou disponibilidade automaticamente.
+
+O painel traz uma lista editorial de palavras-chave em `src/keywords.js`, com videogames e eletrônicos em destaque, além de ferramentas, casa, acessórios e outras categorias. Não é um ranking de vendas. Cada palavra abre buscas em AliExpress, Shopee, OLX e Facebook. Os resultados não são coletados automaticamente.
+
+Ofertas online podem ser comparadas sem nenhum anúncio local. Informe **Seu preço de revenda deste modelo** em cada cartão; a meta é salva por modelo e condição neste navegador. Sem meta, a referência local continua opcional. Sem ambas, o painel mostra o custo de compra e o lucro indeterminado. A meta é uma hipótese do usuário, não um preço de venda comprovado. O lucro desconta taxas de venda e custos extras configurados.
