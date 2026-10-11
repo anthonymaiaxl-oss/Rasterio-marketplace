@@ -24,3 +24,13 @@ test('restaura alarme ausente e roda manualmente sem interromper outras fontes',
  const previous=store.settings.lastTerm;const update=chrome.tabs.update;chrome.tabs.update=async(id,opts)=>{if(id===store.settings.tabs.OLX)throw Error('Aba temporariamente indisponível');return update(id,opts);};
  assert.equal((await message({type:'rotateNow'})).ok,true);assert.notEqual(store.settings.lastTerm,previous);assert.equal(store.settings.rotationResults.filter(r=>r.ok).length,2);assert.match(store.settings.rotationResults[0].error,/indisponível/);chrome.tabs.update=update;
 });
+
+test('coleta por link autoriza apenas o anúncio solicitado mesmo com rodízio pausado',async()=>{
+ await message({type:'settings',terms:'PS5',minutes:15,running:false});
+ const result=await message({type:'captureLink',url:'https://www.facebook.com/marketplace/item/123456/?ref=search'},{url:'chrome-extension://test/insights.html'});assert.equal(result.ok,true);
+ const id=nextId-1;assert.equal(tabs.get(id).url,'https://www.facebook.com/marketplace/item/123456/');
+ const sample={source:'Facebook',title:'PS5 semi novo',price:1999,text:'Nova Mutum, MT',url:tabs.get(id).url};
+ await message({type:'collect',offers:[sample,{...sample,url:'https://www.facebook.com/marketplace/item/999999/'}],diagnostics:{detail:true}},{url:tabs.get(id).url,tab:{id}});
+ assert.ok(store.offers.some(o=>o.url===sample.url));assert.ok(!store.offers.some(o=>o.url.endsWith('/999999/')));
+ const denied=await message({type:'captureLink',url:'https://www.facebook.com/messages/'});assert.match(denied.error,/anúncio/);
+});
