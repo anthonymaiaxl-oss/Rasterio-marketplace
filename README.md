@@ -52,3 +52,9 @@ Destino informado: CEP **78450-080**, Nova Mutum (MT). Configure esse CEP no che
 O painel traz uma lista editorial de palavras-chave em `src/keywords.js`, com videogames e eletrônicos em destaque, além de ferramentas, casa, acessórios e outras categorias. Não é um ranking de vendas. Cada palavra abre buscas em AliExpress, Shopee, OLX e Facebook. Os resultados não são coletados automaticamente.
 
 Ofertas online podem ser comparadas sem nenhum anúncio local. Informe **Seu preço de revenda deste modelo** em cada cartão; a meta é salva por modelo e condição neste navegador. Sem meta, a referência local continua opcional. Sem ambas, o painel mostra o custo de compra e o lucro indeterminado. A meta é uma hipótese do usuário, não um preço de venda comprovado. O lucro desconta taxas de venda e custos extras configurados.
+
+## Fotos e prints
+
+O painel inicia em **Meus anúncios**, sem ofertas fictícias. Exemplos continuam disponíveis apenas pelo botão explícito **Ver demonstração**. No cadastro, anexe uma foto ou print do anúncio (PNG, JPEG ou WebP, até 1 MB). A imagem aparece no cartão e na comparação, é salva neste navegador e acompanha a exportação JSON. Ela é fornecida pelo usuário, não capturada automaticamente nem certificada pelo Rasterio. O espaço do navegador é limitado: exporte os dados regularmente.
+
+A tentativa de consultar a OLX neste ambiente recebeu HTTP 403 do proxy de rede em 11/10/2026, antes de chegar ao site. Os domínios de OLX, Facebook, AliExpress e Shopee foram adicionados ao rascunho de configurações; salvar/publicar é necessário para ativá-los. Isso não instala uma integração de coleta nem garante acesso às plataformas após a liberação. A coleta e a validação de anúncios reais continuam pendentes.
