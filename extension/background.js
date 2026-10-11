@@ -5,10 +5,17 @@ function serial(fn){const next=queue.then(fn);queue=next.catch(()=>{});return ne
 async function settings(){return {...defaults,...(await chrome.storage.local.get('settings')).settings};}
 async function schedule(s){
  await chrome.alarms.clear('rotate');
- if(s.running){const nextRotation=Date.now()+s.minutes*60000;await chrome.alarms.create('rotate',{when:nextRotation,periodInMinutes:s.minutes});await chrome.storage.local.set({settings:{...s,nextRotation}});}
+ await chrome.alarms.clear('watchdog');
+ if(s.running){await chrome.alarms.create('watchdog',{periodInMinutes:1});const nextRotation=Date.now()+s.minutes*60000;await chrome.alarms.create('rotate',{when:nextRotation,periodInMinutes:s.minutes});await chrome.storage.local.set({settings:{...s,nextRotation}});}
  else await chrome.storage.local.set({settings:{...s,nextRotation:null}});
 }
-async function ensureSchedule(){const s=await settings();if(!s.running)return;if(!await chrome.alarms.get('rotate')){const when=Math.max(Date.now()+1000,s.nextRotation||Date.now()+s.minutes*60000);await chrome.alarms.create('rotate',{when,periodInMinutes:s.minutes});await chrome.storage.local.set({settings:{...s,nextRotation:when}});}}
+async function ensureSchedule(){
+ const s=await settings();if(!s.running)return;
+ if(!await chrome.alarms.get('watchdog'))await chrome.alarms.create('watchdog',{periodInMinutes:1});
+ const due=s.nextRotation||((s.lastRotation||Date.now())+s.minutes*60000);
+ if(due<=Date.now()){await rotate();await schedule(await settings());return;}
+ if(!await chrome.alarms.get('rotate')){await chrome.alarms.create('rotate',{when:due,periodInMinutes:s.minutes});await chrome.storage.local.set({settings:{...s,nextRotation:due}});}
+}
 async function rotate(){const s=await settings();if(!s.running||!s.terms.length)return;const sources=['OLX','AliExpress','Shopee',...(s.facebookConfirmed?['Facebook']:[])];const term=s.terms[s.index%s.terms.length];const platformIndex=(s.platformIndex||0)%sources.length;const passIndex=(s.passIndex||0)%(s.passes||2);const results=[];
  for(const source of [sources[platformIndex]]){
   try{const url=searchURL(source,term);let tab;const oldTabs={...s.tabs};
@@ -22,15 +29,15 @@ async function rotate(){const s=await settings();if(!s.running||!s.terms.length)
   }catch(e){results.push({source,ok:false,error:String(e.message).slice(0,200)});}
  }
  s.platformIndex=(platformIndex+1)%sources.length;if(s.platformIndex===0){s.index=(s.index+1)%s.terms.length;if(s.index===0)s.passIndex=(passIndex+1)%(s.passes||2);}s.lastRotation=Date.now();s.lastTerm=term;s.lastSource=sources[platformIndex];s.rotationResults=results;const day=new Date().toLocaleDateString('sv-SE');const signature=JSON.stringify([sources,s.terms,s.passes||2]);const progress=s.dailyProgress;if(!progress||progress.day!==day||progress.signature!==signature)s.dailyProgress={day,signature,visited:[]};if(results.some(r=>r.ok)){const key=JSON.stringify([sources[platformIndex],term,passIndex]);s.dailyProgress.visited=[...new Set([...s.dailyProgress.visited,key])];}
- const alarm=await chrome.alarms.get('rotate');s.nextRotation=alarm?.scheduledTime||Date.now()+s.minutes*60000;
+ const alarm=await chrome.alarms.get('rotate');s.nextRotation=alarm?.scheduledTime>Date.now()?alarm.scheduledTime:Date.now()+s.minutes*60000;
  await chrome.storage.local.set({settings:s});
 }
 // Service workers restart often; alarms may disappear after browser restart.
 serial(ensureSchedule);
 chrome.action.onClicked.addListener(()=>chrome.tabs.create({url:chrome.runtime.getURL('insights.html')}));
 chrome.runtime.onInstalled.addListener(()=>serial(async()=>{const s=await settings();await chrome.storage.local.set({settings:s});await schedule(s);}));
-chrome.runtime.onStartup.addListener(()=>serial(async()=>schedule(await settings())));
-chrome.alarms.onAlarm.addListener(a=>{if(a.name==='rotate')serial(rotate).catch(async e=>chrome.storage.local.set({rotationError:String(e.message)}));});
+chrome.runtime.onStartup.addListener(()=>serial(ensureSchedule));
+chrome.alarms.onAlarm.addListener(a=>{if(['rotate','watchdog'].includes(a.name))serial(a.name==='rotate'?rotate:ensureSchedule).catch(async e=>chrome.storage.local.set({rotationError:String(e.message)}));});
 chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  const internal=['dashboard.html','insights.html'].some(path=>sender.url?.split('?')[0]===chrome.runtime.getURL(path));
  if(m.type==='collectorState'&&sender.tab&&sourceFor(sender.url)){serial(async()=>{const s=await settings();const source=sourceFor(sender.url);const captures=(await chrome.storage.local.get('captureTabs')).captureTabs||{};const request=captures[sender.tab.id];return {pagination:Boolean(s.running&&s.managedTabId===sender.tab.id&&searchPage(sender.url)),allowed:Boolean(s.running&&s.tabs[source]===sender.tab.id||request&&request.until>Date.now()&&sourceFor(request.url)===source)};}).then(respond,e=>respond({allowed:false}));return true;}
@@ -42,7 +49,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  serial(async()=>{
  if(m.type==='captureLink'){const url=new URL(String(m.url));const source=sourceFor(url.href);const patterns={Facebook:/^\/marketplace\/item\/\d+\/?$/,AliExpress:/^\/item\/\d+\.html$/,Shopee:/-i\.\d+\.\d+|^\/product\/\d+\/\d+/,OLX:/\/\d{6,}(?:[/?#]|$)|\/anuncio\//};if(!source||!patterns[source].test(url.pathname))throw Error('Cole um link HTTPS de um anúncio específico nas fontes configuradas.');url.search='';url.hash='';const tab=await chrome.tabs.create({url:url.href,active:true});const previous=(await chrome.storage.local.get('captureTabs')).captureTabs||{};const entries=Object.entries(previous).filter(([,v])=>v.until>Date.now()).slice(-49);await chrome.storage.local.set({captureTabs:{...Object.fromEntries(entries),[tab.id]:{url:url.href,until:Date.now()+20*60000}}});return {ok:true};}
  if(m.type==='diagnostics'){await ensureSchedule();return {ok:true,alarm:await chrome.alarms.get('rotate')};}
- if(m.type==='rotateNow'){const s=await settings();if(!s.running)throw Error('Ative e salve o acompanhamento primeiro.');await rotate();}
+ if(m.type==='rotateNow'){const s=await settings();if(!s.running)throw Error('Ative e salve o acompanhamento primeiro.');await rotate();await schedule(await settings());}
  if(m.type==='settings'){const old=await settings();const terms=String(m.terms||'').split('\n').map(t=>t.trim().slice(0,100)).filter(Boolean).slice(0,100);if(!terms.length)throw Error('Informe pelo menos uma busca.');const s={...old,running:Boolean(m.running),minutes:Math.max(10,Math.min(120,Number(m.minutes)||15)),terms,facebookConfirmed:Boolean(m.facebookConfirmed),facebookRadius:Math.max(1,Math.min(500,Number(m.facebookRadius)||old.facebookRadius||80)),passes:Math.max(1,Math.min(5,Number(m.passes)||old.passes||2)),pagesPerRound:Math.max(1,Math.min(5,Number(m.pagesPerRound)||old.pagesPerRound||3))};await chrome.storage.local.set({settings:s});await schedule(s);if(s.running&&!old.running)await rotate();}
  if(m.type==='review'){const d=await chrome.storage.local.get('offers');const offers=d.offers||[];const o=offers.find(o=>o.url===m.url);if(!o)throw Error('Anúncio não encontrado.');const r=m.review;for(const k of ['shipping','tax','repair','reserve'])if(!Number.isFinite(r[k])||r[k]<0||r[k]>1000000)throw Error('Informe os custos, inclusive zero quando confirmado.');Object.assign(o,{model:String(r.model).trim().slice(0,150),condition:['Novo','Usado'].includes(r.condition)?r.condition:'Usado',working:Boolean(r.working),simpleRepair:Boolean(r.simpleRepair),delivery:Boolean(r.delivery),shipping:r.shipping,tax:r.tax,repair:r.repair,reserve:r.reserve,reviewed:true});await chrome.storage.local.set({offers});}
  if(m.type==='clear')await chrome.storage.local.remove(['offers','lastCollection']);

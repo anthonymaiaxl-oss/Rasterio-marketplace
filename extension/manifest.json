@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Rasterio — Radar de oportunidades",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Acompanha buscas abertas e compara ofertas revisadas por você.",
   "permissions": ["storage", "alarms"],
   "host_permissions": ["https://*.olx.com.br/*", "https://*.aliexpress.com/*", "https://shopee.com.br/*", "https://www.shopee.com.br/*", "https://www.facebook.com/marketplace/*"],
