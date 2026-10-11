@@ -25,7 +25,7 @@ Os testes de navegador usam `/usr/bin/chromium` no ambiente de nuvem; em outro s
 
 ## Dados e limites
 
-Não há coleta automática do Facebook, AliExpress, Shopee ou OLX. A tela inicial apresenta exemplos fictícios claramente identificados. Clique em **Usar meus anúncios**, **Adicionar anúncio** ou **Importar JSON** para trabalhar com anúncios consultados por você. A importação é atômica: qualquer item inválido rejeita todo o arquivo. Baixe o modelo JSON no painel. A importação acrescenta os registros e cria IDs novos; evite importar o mesmo arquivo repetidamente.
+O painel web não coleta anúncios automaticamente. A extensão opcional do Chrome acompanha abas dedicadas de OLX, AliExpress, Shopee e Facebook; veja `extension/README.md`. A tela inicial apresenta exemplos fictícios claramente identificados. Clique em **Usar meus anúncios**, **Adicionar anúncio** ou **Importar JSON** para trabalhar com anúncios consultados por você. A importação é atômica: qualquer item inválido rejeita todo o arquivo. Baixe o modelo JSON no painel. A importação acrescenta os registros e cria IDs novos; evite importar o mesmo arquivo repetidamente.
 
 Dados são salvos no localStorage deste navegador; não são sincronizados. Exporte antes de mudar de computador. URLs devem usar HTTPS e o domínio da fonte selecionada. Não importe informações pessoais dos vendedores.
 
@@ -43,7 +43,7 @@ Informe valores finais do checkout para seu CEP. Cupons podem ser restritos a no
 
 ## Integração futura
 
-O rastreamento automático permanece pendente de uma fonte de dados autorizada/acessível, documentação da integração e validação de cobertura regional. Esta versão não pede senha do Facebook, não automatiza login e não contorna restrições das plataformas. Não há credenciais ou serviços externos obrigatórios para o fluxo de cadastro/importação.
+A coleta no painel web permanece pendente de integração; a extensão opcional acompanha páginas no Chrome do usuário, com validação real de cada plataforma ainda pendente. Esta versão não pede senha do Facebook, não automatiza login e não contorna restrições das plataformas. Não há credenciais ou serviços externos obrigatórios para o fluxo de cadastro/importação.
 
 ## Revenda local e palavras-chave
 
@@ -58,3 +58,9 @@ Ofertas online podem ser comparadas sem nenhum anúncio local. Informe **Seu pre
 O painel inicia em **Meus anúncios**, sem ofertas fictícias. Exemplos continuam disponíveis apenas pelo botão explícito **Ver demonstração**. No cadastro, anexe uma foto ou print do anúncio (PNG, JPEG ou WebP, até 1 MB). A imagem aparece no cartão e na comparação, é salva neste navegador e acompanha a exportação JSON. Ela é fornecida pelo usuário, não capturada automaticamente nem certificada pelo Rasterio. O espaço do navegador é limitado: exporte os dados regularmente.
 
 A tentativa de consultar a OLX neste ambiente recebeu HTTP 403 do proxy de rede em 11/10/2026, antes de chegar ao site. Os domínios de OLX, Facebook, AliExpress e Shopee foram adicionados ao rascunho de configurações; salvar/publicar é necessário para ativá-los. Isso não instala uma integração de coleta nem garante acesso às plataformas após a liberação. A coleta e a validação de anúncios reais continuam pendentes.
+
+## Extensão do Chrome
+
+A pasta `extension` contém a extensão Manifest V3 com rodízio de buscas, coleta de cartões carregados, histórico local, média/mediana e revisão de oportunidades. Instalação e limitações em [extension/README.md](extension/README.md). O Facebook é usado somente como referência em Nova Mutum/200 km, configurados pelo usuário. A extensão e o painel web têm armazenamentos separados.
+
+Teste do coletor: `node scripts/test-collector.mjs`. Teste da extensão carregada: `node scripts/test-extension.mjs`, em um Chromium que permita instalar extensões. Ambos usam páginas de teste interceptadas pelo navegador, sem consultar anúncios reais. A política do Chromium da nuvem bloqueou o segundo teste.

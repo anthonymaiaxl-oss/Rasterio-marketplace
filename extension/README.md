@@ -1,0 +1,26 @@
+# Extensão Rasterio para Chrome
+
+## Instalar no seu computador
+
+1. Baixe/descompacte a pasta `extension` deste repositório.
+2. No Chrome, abra `chrome://extensions`, ative **Modo do desenvolvedor** e clique em **Carregar sem compactação**.
+3. Selecione a pasta `extension` (a que contém `manifest.json`). Fixe o ícone Rasterio e clique nele para abrir o painel.
+4. Configure seu CEP nas lojas. Abra o Facebook Marketplace e configure **Nova Mutum–MT / 200 km**. Só marque a confirmação do painel depois de conferir esse filtro. A extensão não verifica distância nem altera localização automaticamente.
+5. Ajuste as buscas, confirme o intervalo (15 minutos por padrão) e ative o rodízio. Cada rodada abre/reutiliza uma aba dedicada por fonte. Facebook só participa após a confirmação regional; nunca aparece como oportunidade de compra.
+6. Revise os anúncios: modelo/configuração, condição, funcionamento, entrega e todos os custos. Informe zero apenas quando confirmado. Marque reparo simples apenas depois de conferir diagnóstico, disponibilidade da peça e custo.
+
+## O que funciona
+
+Chrome Manifest V3, armazenamento local, rodízio persistente, coleta de cartões carregados, deduplicação por URL e histórico de mudanças de preço. Inspeção inicial após 5 segundos e depois a cada 2 minutos, somente nas abas dedicadas enquanto o acompanhamento está ativo. Pausar o rodízio também pausa a aceitação de dados. Não fecha abas do usuário.
+
+Média e mediana exigem três outros anúncios equivalentes revisados e funcionando, vistos nos últimos sete dias. A oferta não entra na própria referência. O ranking exige observação nas últimas 24 horas, entrega confirmada, custos preenchidos e revisão. A economia é mediana menos preço, frete, impostos/taxas, reparo e reserva; não é lucro garantido. Facebook entra apenas como referência com região confirmada. Preços são preços pedidos, não vendas realizadas. Mudanças na descrição invalidam a revisão.
+
+## Limites
+
+Esta é a primeira versão, com extratores conservadores: cartões com vários preços, parcelas ou variantes são ignorados para evitar pegar o preço errado. Títulos, estado, especificações, frete e impostos não são certificados automaticamente. Descrição de cartão não revela todos os defeitos; a classificação é uma triagem por palavras, não diagnóstico técnico. Ausência de menção a defeito não comprova funcionamento. A coleta não certifica que um anúncio ainda está disponível.
+
+Sites podem mudar seu HTML, exigir login/CAPTCHA ou recusar automação. Navegador fechado, abas suspensas e carregamento incompleto interrompem a coleta. Não há rolagem automática, coleta de cookies/senhas, login automático nem contorno de bloqueios. O rodízio troca a pesquisa nas abas dedicadas; mova uma aba para outro site para ela deixar de ser reutilizada.
+
+O painel da extensão é independente do painel web atual. A exportação `rasterio-extension-v1` contém o histórico bruto/revisões; não é o formato de importação do painel web. Dados ficam neste perfil do Chrome, limitados a 2.000 anúncios e 30 mudanças por anúncio. Exporte antes de remover a extensão. As buscas cobrem categorias escolhidas, não todo o catálogo dos sites.
+
+Validação automatizada cobre análise, persistência e rodízio com APIs do Chrome simuladas, além do extrator real em uma página de teste. O teste com a extensão carregada não pôde executar na nuvem: a política do Chromium bloqueia instalação de extensões. Coleta real em sua sessão do Chrome precisa ser conferida em cada plataforma após instalar.
