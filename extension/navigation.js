@@ -1,0 +1,3 @@
+import {sourceFor} from './core.js';
+export function searchPage(url){try{const u=new URL(url),s=sourceFor(url);return s==='OLX'&&u.searchParams.has('q')||s==='Shopee'&&u.pathname==='/search'&&u.searchParams.has('keyword')||s==='Facebook'&&u.pathname.startsWith('/marketplace/search')&&u.searchParams.has('query')||s==='AliExpress'&&/^\/w\/wholesale-.*\.html$/.test(u.pathname);}catch{return false;}}
+export function validNext(current,next){try{const a=new URL(current),b=new URL(next,current);if(!searchPage(a.href)||!searchPage(b.href)||a.origin!==b.origin||a.pathname!==b.pathname||a.href===b.href)return false;for(const key of ['q','keyword','query'])if(a.searchParams.get(key)!==b.searchParams.get(key))return false;return true;}catch{return false;}}

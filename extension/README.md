@@ -82,3 +82,11 @@ Com 16 termos e quatro plataformas há 64 combinações por passagem; duas passa
 ## Repetidos — versão 0.3.3
 
 A coleta reúne URLs do mesmo anúncio sem parâmetros de rastreamento. Reencontrar o mesmo anúncio com o mesmo preço atualiza a data da consulta, sem adicionar cartão nem observação de preço repetida. Uma mudança de preço acrescenta histórico. Navegação automática por páginas de resultados e abertura sequencial de detalhes ainda não estão implementadas nesta versão.
+
+## Avanço de resultados — versão 0.4.0
+
+O loop tenta avançar a próxima página na mesma aba: controles reconhecidos de próximo/next ou link `rel=next`. O Facebook pode carregar mais resultados com uma rolagem limitada. Configure **Páginas / carregamentos por rodada**, de 1 a 5, padrão 3 (inclui a primeira página). Há pelo menos um minuto entre avanços; depois de cada mudança, o coletor aguarda carregamento e lê novamente. No Facebook, itens já lidos naquele carregamento são pulados após a rolagem; entre rodadas, URLs repetidas continuam sendo reunidas para atualizar preço/histórico. Não abre anúncios individualmente.
+
+O avanço é autorizado somente na aba automática ativa do loop e na mesma busca/plataforma. Não ocorre em capturas manuais de detalhes, no acompanhamento pausado, em páginas sem produtos coletados ou com verificação/CAPTCHA. Destinos externos e alteração do termo/caminho são rejeitados. O limite permanece no serviço mesmo se o coletor reiniciar. Layouts cujo controle não seja reconhecido podem permanecer na primeira página; coleta real precisa ser conferida na sessão do usuário. Teste DOM do botão de próxima página: `node scripts/test-pagination.mjs`.
+
+Os primeiros anúncios podem aparecer após a leitura inicial, entre cerca de 30 segundos e dois minutos se o site carregar e o extrator reconhecer os cartões. Três páginas/carregamentos levam aproximadamente dois a três minutos dentro de uma rodada de dez minutos. Para um teste curto, escolha um ou dois termos, uma passagem e intervalo de dez minutos: com quatro fontes, são cerca de 40 ou 80 minutos para um ciclo. O ranking de oportunidades requer também revisão do modelo/condição e três referências equivalentes, além dos custos; coleta sozinha não garante oportunidades calculáveis.
