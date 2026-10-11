@@ -1,0 +1,17 @@
+export const products = [
+{id:1,name:'Luminária Aurora',category:'Casa e decoração',price:189.90,oldPrice:229.90,icon:'💡',color:'#f3e9d6',tag:'Mais vendido',description:'Luz acolhedora e design que transforma qualquer cantinho. Luminária de mesa com acabamento fosco, base estável e iluminação LED de tom quente.',details:['LED de luz quente','Altura: 32 cm','Bivolt • cabo de 1,5 m']},
+{id:2,name:'Fone sem fio Pulse',category:'Tecnologia',price:249.90,oldPrice:329.90,icon:'🎧',color:'#e1e7e6',tag:'Oferta',description:'Sua trilha sonora, com conforto o dia inteiro. Fone Bluetooth com isolamento passivo e controles integrados para acompanhar sua rotina.',details:['Até 20 horas de bateria','Conexão Bluetooth','Microfone integrado']},
+{id:3,name:'Mochila Horizonte',category:'Moda e acessórios',price:159.90,icon:'🎒',color:'#eaded3',tag:'Novidade',description:'Feita para ir com você. Mochila versátil com compartimentos organizadores e espaço para o essencial do trabalho ou de uma escapada.',details:['Capacidade de 20 litros','Compartimento para notebook de 15”','Tecido resistente à água']},
+{id:4,name:'Cafeteira Essencial',category:'Casa e decoração',price:219.90,icon:'☕',color:'#e7e5da',tag:'Seleção Rasterio',description:'Comece o dia com um bom café. Cafeteira compacta de filtro com jarra de vidro e placa de aquecimento.',details:['Capacidade: 600 ml','Filtro reutilizável','Voltagem: 127 V']},
+{id:5,name:'Tênis Urban',category:'Moda e acessórios',price:199.90,oldPrice:259.90,icon:'👟',color:'#e4e8da',tag:'Oferta',description:'Leveza e estilo para os seus caminhos. Tênis casual com palmilha macia e solado flexível. Nesta edição inicial, disponível no tamanho 39.',details:['Tamanho: 39','Palmilha acolchoada','Solado de borracha']},
+{id:6,name:'Câmera Instant Mini',category:'Tecnologia',price:479.90,icon:'📷',color:'#eadfdc',tag:'Novidade',description:'Memórias que saem da tela. Câmera instantânea compacta para registrar os pequenos momentos e guardar grandes histórias.',details:['Flash automático','Alça de pulso inclusa','Filme vendido separadamente']},
+{id:7,name:'Kit Jardim',category:'Vida ao ar livre',price:89.90,icon:'🌱',color:'#dce7d9',tag:'Seleção Rasterio',description:'Um convite para cultivar. Kit de ferramentas compactas para cuidar de vasos, ervas e pequenas plantas.',details:['3 ferramentas de jardinagem','Cabos de madeira','Uso doméstico']},
+{id:8,name:'Garrafa Flow',category:'Vida ao ar livre',price:79.90,icon:'🥤',color:'#dce6eb',tag:'Mais vendido',description:'Hidratação que acompanha seu ritmo. Garrafa de aço inox com isolamento térmico e tampa com vedação.',details:['Capacidade: 500 ml','Aço inox','Conserva bebidas frias por até 12 h']}
+];
+export const money = value => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(value);
+export const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+export function filterProducts({query='',category='Todos',maxPrice=500,sort='featured'}={}) {
+ const result=products.filter(p=>(category==='Todos'||p.category===category)&&p.price<=maxPrice&&normalize(p.name+' '+p.category).includes(normalize(query)));
+ if(sort==='low')result.sort((a,b)=>a.price-b.price);if(sort==='high')result.sort((a,b)=>b.price-a.price);if(sort==='name')result.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));return result;
+}
+export function cartTotal(cart){return cart.reduce((sum,item)=>sum+Math.round((products.find(p=>p.id===item.id)?.price||0)*100)*item.quantity,0)/100;}
