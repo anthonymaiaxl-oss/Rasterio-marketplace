@@ -24,3 +24,7 @@ Sites podem mudar seu HTML, exigir login/CAPTCHA ou recusar automação. Navegad
 O painel da extensão é independente do painel web atual. A exportação `rasterio-extension-v1` contém o histórico bruto/revisões; não é o formato de importação do painel web. Dados ficam neste perfil do Chrome, limitados a 2.000 anúncios e 30 mudanças por anúncio. Exporte antes de remover a extensão. As buscas cobrem categorias escolhidas, não todo o catálogo dos sites.
 
 Validação automatizada cobre análise, persistência e rodízio com APIs do Chrome simuladas, além do extrator real em uma página de teste. O teste com a extensão carregada não pôde executar na nuvem: a política do Chromium bloqueia instalação de extensões. Coleta real em sua sessão do Chrome precisa ser conferida em cada plataforma após instalar.
+
+## Atualizar para 0.1.1
+
+Baixe novamente a mesma branch e substitua os arquivos na pasta `extension` que já foi carregada no Chrome. Em `chrome://extensions`, clique no botão de recarregar do Rasterio; não remova a extensão, para preservar os dados locais. Feche o painel antigo e abra novamente pelo ícone. Ative/salve o acompanhamento e clique em **Rodar agora**. O painel exibe a última rodada, a próxima prevista e erros por fonte. Alarmes ausentes são recriados quando o serviço/painel reinicia; falhas em uma aba não interrompem as demais fontes. Chrome pode atrasar alarmes enquanto o computador dorme.
