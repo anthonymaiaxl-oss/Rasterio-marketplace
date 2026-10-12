@@ -1,11 +1,39 @@
 {
   "manifest_version": 3,
   "name": "Rasterio — Radar de oportunidades",
-  "version": "0.4.3",
-  "description": "Acompanha buscas abertas e compara ofertas revisadas por você.",
-  "permissions": ["storage", "alarms"],
-  "host_permissions": ["https://*.olx.com.br/*", "https://*.aliexpress.com/*", "https://shopee.com.br/*", "https://www.shopee.com.br/*", "https://www.facebook.com/marketplace/*"],
-  "background": {"service_worker": "background.js", "type": "module"},
-  "action": {"default_title": "Abrir Radar Rasterio"},
-  "content_scripts": [{"matches": ["https://*.olx.com.br/*", "https://*.aliexpress.com/*", "https://shopee.com.br/*", "https://www.shopee.com.br/*", "https://www.facebook.com/marketplace/*"], "js": ["collector.js"], "run_at": "document_idle"}]
+  "version": "0.5.0",
+  "description": "Analisa histórico e cenários de revenda por modelo, com referência regional e registro de vendas.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.olx.com.br/*",
+    "https://*.aliexpress.com/*",
+    "https://shopee.com.br/*",
+    "https://www.shopee.com.br/*",
+    "https://www.facebook.com/marketplace/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Abrir Radar Rasterio"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.olx.com.br/*",
+        "https://*.aliexpress.com/*",
+        "https://shopee.com.br/*",
+        "https://www.shopee.com.br/*",
+        "https://www.facebook.com/marketplace/*"
+      ],
+      "js": [
+        "collector.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
 }

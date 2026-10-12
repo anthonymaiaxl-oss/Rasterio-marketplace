@@ -93,3 +93,18 @@ Os primeiros anúncios podem aparecer após a leitura inicial, entre cerca de 30
 
 ### 0.4.2
 Verificação de rodadas vencidas a cada minuto, retomada sem reiniciar a espera no início do Chrome e restauração do agendamento após Rodar agora. Computador suspenso pode atrasar alarmes; a retomada ocorre quando o Chrome volta a executar.
+
+## 0.5.0 — análise automática e revenda
+
+As seções anteriores registram o histórico das versões. Nesta versão, a revisão manual não é pré-requisito do ranking. Modelos reconhecidos no título (consoles, iPhone, Galaxy e alguns códigos de fabricantes) ou informados na revisão são comparados por versão, capacidade, condição e tipo. Atributos ausentes permanecem desconhecidos; não se misturam com atributos conhecidos. Kits e acessórios ficam separados e não entram no ranking de produtos. Identificação textual é limitada e pode exigir correção em anúncios ambíguos.
+
+Nova Mutum / 80 km é a prioridade padrão. Havendo três referências locais equivalentes, a média e a mediana usam essa amostra; senão, a origem aparece como entre fontes. Facebook participa só como referência regional, nunca como compra. A oferta analisada é excluída de sua própria referência. Referências têm até sete dias; ofertas do ranking, até um dia. Preços são pedidos, não transações comprovadas.
+
+Revenda provável = mediana × (1 − negociação de venda). Custo total = preço × (1 − negociação de compra) + frete + impostos + reparo + reserva + taxas de compra. Lucro = revenda provável × (1 − taxa de venda) − custo total. Retorno = lucro / custo total. Compra máxima negociada = máximo entre zero e [receita líquida / (1 + retorno desejado) − custos adicionais]. Valores monetários são arredondados a centavos.
+
+Custos confirmados na revisão prevalecem sobre o cenário global; os ausentes usam as hipóteses ajustáveis do cenário. O cartão identifica custos assumidos. Confiança descreve a cobertura de referências e atributos; não é probabilidade de venda ou de funcionamento. Confirme frete, entrega, tributos e funcionamento antes de negociar. O simulador permite sobrescrever os custos de cada anúncio, sem modificar a coleta.
+
+Registre as revendas com datas e valores efetivos para medir lucro realizado e dias entre compra e venda. Não estimamos demanda ou prazo usando volume de anúncios. Backup completo guarda histórico, fotos, configurações, cenários e revendas. A restauração reúne anúncios e revendas sem apagar os atuais; mantém configurações existentes. Em navegador novo, restaura buscas com rodízio pausado, sem importar IDs antigos de abas. A atualização mantém as chaves de armazenamento e o loop econômico com uma aba automática. Para manter dados ao reinstalar, use a mesma pasta e Recarregar na extensão existente; exporte backup antes de remover a instalação.
+
+### Instalar 0.5.0
+Descompacte `rasterio-chrome-0.5.0.zip`, abra `chrome://extensions` e carregue a pasta que contém `manifest.json`. Para atualizar, substitua os arquivos na pasta já usada e clique em Recarregar. Padrões atuais: intervalo de 10 minutos, duas passagens, até três páginas por rodada e uma aba automática.
